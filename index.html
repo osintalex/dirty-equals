@@ -393,6 +393,8 @@
 <hr />
 <p><strong>dirty-equals</strong> is a python library that (mis)uses the <code>__eq__</code> method to make python code (generally unit tests)
 more declarative and therefore easier to read and write.</p>
+<p><em>dirty-equals</em> can be used in whatever context you like, but it comes into its own when writing unit tests for
+applications where you're commonly checking the response to API calls and the contents of a database.</p>
 <h2 id="usage">Usage<a class="headerlink" href="#usage" title="Permanent link">&para;</a></h2>
 <p>Here's a trivial example of what <em>dirty-equals</em> can do:</p>
 <div class="highlight"><span class="filename">Trival Usage</span><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="kn">from</span> <span class="nn">dirty_equals</span> <span class="kn">import</span> <span class="n">IsPositive</span>
@@ -405,19 +407,20 @@ more declarative and therefore easier to read and write.</p>
 <li>This will fail (raise a <code>AssertionError</code>) since <code>-2</code> is not positive, 
    so the result of <code>-2 == IsPositive</code> is <code>False</code>.</li>
 </ol>
-<p>That doesn't look very useful yet, but consider the following unit test code using <strong>dirty-equals</strong>:</p>
+<p><strong>Not that interesting yet!</strong>, but consider the following unit test code using <strong>dirty-equals</strong>:</p>
 <div class="highlight"><span class="filename">More Powerful Usage</span><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="kn">from</span> <span class="nn">dirty_equals</span> <span class="kn">import</span> <span class="n">IsJson</span><span class="p">,</span> <span class="n">IsNow</span><span class="p">,</span> <span class="n">IsPositiveInt</span><span class="p">,</span> <span class="n">IsStr</span>
 <a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>
-<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="o">...</span>
-<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>
-<a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a><span class="c1"># user_data is a dict returned from a database or API which we want to test</span>
-<a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a><span class="k">assert</span> <span class="n">user_data</span> <span class="o">==</span> <span class="p">{</span>
-<a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a>    <span class="s1">&#39;id&#39;</span><span class="p">:</span> <span class="n">IsPositiveInt</span><span class="p">,</span> <span class="c1">#(1)!</span>
-<a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a>    <span class="s1">&#39;username&#39;</span><span class="p">:</span> <span class="s1">&#39;samuelcolvin&#39;</span><span class="p">,</span> <span class="c1">#(2)!</span>
-<a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a>    <span class="s1">&#39;avatar_file&#39;</span><span class="p">:</span> <span class="n">IsStr</span><span class="p">(</span><span class="n">regex</span><span class="o">=</span><span class="sa">r</span><span class="s1">&#39;/[a-z0-9\-]</span><span class="si">{10}</span><span class="s1">/example\.png&#39;</span><span class="p">),</span> <span class="c1">#(3)!</span>
-<a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a>    <span class="s1">&#39;settings_json&#39;</span><span class="p">:</span> <span class="n">IsJson</span><span class="p">({</span><span class="s1">&#39;theme&#39;</span><span class="p">:</span> <span class="s1">&#39;dark&#39;</span><span class="p">,</span> <span class="s1">&#39;language&#39;</span><span class="p">:</span> <span class="s1">&#39;en&#39;</span><span class="p">}),</span> <span class="c1">#(4)!</span>
-<a id="__codelineno-1-11" name="__codelineno-1-11" href="#__codelineno-1-11"></a>    <span class="s1">&#39;created_ts&#39;</span><span class="p">:</span> <span class="n">IsNow</span><span class="p">(</span><span class="n">delta</span><span class="o">=</span><span class="mi">3</span><span class="p">),</span> <span class="c1">#(5)!</span>
-<a id="__codelineno-1-12" name="__codelineno-1-12" href="#__codelineno-1-12"></a><span class="p">}</span>
+<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="k">def</span> <span class="nf">test_user_endpoint</span><span class="p">(</span><span class="n">client</span><span class="p">:</span> <span class="n">HttpClient</span><span class="p">,</span> <span class="n">db_conn</span><span class="p">:</span> <span class="n">Database</span><span class="p">):</span> 
+<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>   <span class="n">client</span><span class="o">.</span><span class="n">pust</span><span class="p">(</span><span class="s1">&#39;/users/create/&#39;</span><span class="p">,</span> <span class="n">data</span><span class="o">=...</span><span class="p">)</span>
+<a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a>
+<a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a>   <span class="n">user_data</span> <span class="o">=</span> <span class="n">db_conn</span><span class="o">.</span><span class="n">fetchrow</span><span class="p">(</span><span class="s1">&#39;select * from users&#39;</span><span class="p">)</span>
+<a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a>   <span class="k">assert</span> <span class="n">user_data</span> <span class="o">==</span> <span class="p">{</span>
+<a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a>       <span class="s1">&#39;id&#39;</span><span class="p">:</span> <span class="n">IsPositiveInt</span><span class="p">,</span> <span class="c1">#(1)!</span>
+<a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a>       <span class="s1">&#39;username&#39;</span><span class="p">:</span> <span class="s1">&#39;samuelcolvin&#39;</span><span class="p">,</span> <span class="c1">#(2)!</span>
+<a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a>       <span class="s1">&#39;avatar_file&#39;</span><span class="p">:</span> <span class="n">IsStr</span><span class="p">(</span><span class="n">regex</span><span class="o">=</span><span class="sa">r</span><span class="s1">&#39;/[a-z0-9\-]</span><span class="si">{10}</span><span class="s1">/example\.png&#39;</span><span class="p">),</span> <span class="c1">#(3)!</span>
+<a id="__codelineno-1-11" name="__codelineno-1-11" href="#__codelineno-1-11"></a>       <span class="s1">&#39;settings_json&#39;</span><span class="p">:</span> <span class="n">IsJson</span><span class="p">({</span><span class="s1">&#39;theme&#39;</span><span class="p">:</span> <span class="s1">&#39;dark&#39;</span><span class="p">,</span> <span class="s1">&#39;language&#39;</span><span class="p">:</span> <span class="s1">&#39;en&#39;</span><span class="p">}),</span> <span class="c1">#(4)!</span>
+<a id="__codelineno-1-12" name="__codelineno-1-12" href="#__codelineno-1-12"></a>       <span class="s1">&#39;created_ts&#39;</span><span class="p">:</span> <span class="n">IsNow</span><span class="p">(</span><span class="n">delta</span><span class="o">=</span><span class="mi">3</span><span class="p">),</span> <span class="c1">#(5)!</span>
+<a id="__codelineno-1-13" name="__codelineno-1-13" href="#__codelineno-1-13"></a>   <span class="p">}</span>
 </code></pre></div>
 <ol>
 <li>We don't actually care what the <code>id</code> is, just that it's present, it's an <code>int</code> and it's positive.</li>
@@ -436,6 +439,7 @@ more declarative and therefore easier to read and write.</p>
 <li><code>PartialDict</code> let's you compare a subset of a dictionary</li>
 <li><code>IsStrictDict</code> let's you confirm order in a dictionary</li>
 <li><code>IsList</code> and <code>IsTuple</code> lets you compare partial lists and tuples, with or without order constraints</li>
+<li>nesting any of these types inside any others</li>
 <li><code>IsInstance</code> lets you simply confirm the type of an object</li>
 <li>You can even use boolean operators <code>|</code> and <code>&amp;</code> to combine multiple conditions</li>
 <li>and much more...</li>
