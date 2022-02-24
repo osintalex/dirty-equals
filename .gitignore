@@ -21,3 +21,4 @@ yarn-error.log*
 /.mypy_cache/
 /scratch/
 /site/
+/docs/css/ansi.css
